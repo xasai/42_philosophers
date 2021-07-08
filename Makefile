@@ -20,6 +20,7 @@ PHILO_BONUS_INC := -Iphilo_bonus/include
 ############################################################################################
 CC := gcc
 CFLAGS := -O3 -Wall -Wextra -Werror -MMD -MP
+LDLIBS := -lpthread
  #_____    _____    _____ 
 #/ ____|  / ____|  / ____|
 #| |  __  | |      | |     
@@ -27,31 +28,22 @@ CFLAGS := -O3 -Wall -Wextra -Werror -MMD -MP
 #| |__| | | |____  | |____ 
  #\_____|  \____|  \_____|
 ############################################################################################
-ifeq ($(MAKECMDGOALS),clean)
-DEPFILES=
-else ifeq ($(MAKECMDGOALS),fclean)
-DEPFILES=
-else
-DEPFILES := $(OBJ:.o=.d)
--include $(DEPFILES)
-endif
-vpath %.c philo philo_bonus
-MAKEFLAGS=j
-.PHONY: test re fclean clean all
-############################################################################################
-
 all: $(NAME)
 
 $(NAME): $(OBJPATH) $(BINPATH) $(PHILO_BIN)
 
 $(PHILO_BIN): $(PHILO_OBJ)
 	$(green)
-	$(CC) $(CFLAGS) $(PHILO_INC) $(PHILO_OBJ) -o $(PHILO_BIN)
+	$(CC) $(CFLAGS) $(PHILO_INC) $(PHILO_OBJ) -o $(PHILO_BIN) $(LDLIBS)
+	$(cyan)
+	@echo "\t==============> Successfully compiled $(PHILO_BIN) [+]"
 	$(reset)
 
-bonus: $(PHILO_BONUS_OBJ)
+$(PHILO_BONUS_BIN): $(PHILO_BONUS_OBJ)
 	$(green)	
-	$(CC) $(CFLAGS) $(INC) $(PHILO_BONUS_OBJ) -o $(PHILO_BONUS_BIN)
+	$(CC) $(CFLAGS) $(INC) $(PHILO_BONUS_OBJ) -o $(PHILO_BONUS_BIN) $(LDLIBS) 
+	$(cyan)
+	@echo "\t==============> Successfully compiled $(PHILO_BIN) [+]"
 	$(reset)
 
 
@@ -74,7 +66,6 @@ $(OBJPATH):
 	$(green)	
 	mkdir -p $(OBJDIR) 
 	$(reset)
-	
 
 clean:
 	$(red)
@@ -89,16 +80,41 @@ fclean: clean
 re: fclean
 	@$(MAKE) all
 
+bonus: $(OBJPATH) $(BINPATH) $(PHILO_BONUS_BIN)
+
+run: 
+	./bin/philo
+
+.PHONY: all run re fclean clean 
+
+############################################################################################
+ifeq ($(MAKECMDGOALS),clean)
+DEPFILES :=
+else ifeq ($(MAKECMDGOALS),fclean)
+DEPFILES :=
+else ifeq ($(MAKECMDGOALS),bonus)
+DEPFILES := $(PHILO_BONUS_OBJ:.o=.d)
+-include $(DEPFILES)
+else
+DEPFILES := $(PHILO_OBJ:.o=.d)
+-include $(DEPFILES)
+endif
+MAKEFLAGS := j
+vpath %.c philo philo_bonus
 ############################################################################################
 echo:
-	@echo $(OBJDIR) 
+	@echo $(PHILO_BIN)
+	@echo $(PHILO_OBJ)
+	@echo $(PHILO_INC)
+	@echo $(PHILO_SRC)
 
 val: $(NAME)
 	valgrind --leak-check=full ./$(NAME)
 
 debug: $(NAME)
-	gdb	./$(NAME)
+	gdb	./$(PHILO_BIN)
 ############################################################################################
+cyan	:= @echo  "\033[0;36m"
 green	:= @echo  "\033[0;32m"
 reset	:= @echo -n "\033[0;m"
 red		:= @echo  "\033[0;31m"

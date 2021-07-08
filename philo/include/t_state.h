@@ -1,11 +1,11 @@
-#ifndef _T_STATE_H
-# define _T_STATE_H
+#ifndef T_STATE_H
+# define T_STATE_H
 
-#include <stdint.h>
+# include <stdint.h>
 
 typedef struct s_state
 {
 	uint16_t	state;
 }				t_state;
 
-#endif /* _T_STATE_H */
+#endif /* T_STATE_H */
