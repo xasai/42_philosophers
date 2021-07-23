@@ -20,11 +20,10 @@ void	*xmalloc(size_t size)
 	return (memset(p, 0, size));
 }
 
-inline int	ft_isdigit(char c)
+bool ft_isdigit(char c)
 {
 	return (c >= '0' && c <= '9');
 }
-
 
 int	ft_atoi(const char *nptr)
 {
