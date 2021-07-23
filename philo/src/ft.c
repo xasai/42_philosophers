@@ -15,15 +15,23 @@ bool	_isdigit(char c)
 	return (c >= '0' && c <= '9');
 }
 
-uint64_t _atoi64(const char *nptr)
+long	_atol(const char *nptr)
 {
-	uint64_t	num;
+	long	num;
+	short	sign;
 
 	num = 0;
+	sign = 1;
+	if (*nptr == '-' || *nptr == '+')
+	{
+		if (*nptr == '-')
+			sign = -1;
+		nptr++;
+	}
 	while (_isdigit(*nptr))
 	{
 		num = num * 10 + *nptr - '0';
 		nptr++;
 	}
-	return (num);
+	return (num * sign);
 }

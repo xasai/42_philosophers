@@ -15,7 +15,9 @@ PHILO_INC := -Iinclude
 
 ############################################################################################ 
 CC := gcc
-CFLAGS := -Wall -Wextra -Werror -MMD -MP -Ofast -pthread -pedantic-errors
+CFLAGS := -Wall -Wextra -Werror -MMD -MP -pthread -pedantic-errors
+CFLAGS += -Ofast 
+#CFLAGS += -g3 #FIXME
  #_____    _____    _____ 
 #/ ____|  / ____|  / ____|
 #| |  __  | |      | |     

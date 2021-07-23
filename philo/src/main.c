@@ -21,7 +21,7 @@ static int	_handle_args(int ac, char **av)
 
 static void	run(t_config *cfg)
 {
-	int				tnum;
+	long			tnum;
 	short int		launch;
 	t_tinfo			*tinfo;
 	pthread_t		*threads;
@@ -32,9 +32,9 @@ static void	run(t_config *cfg)
 	while (launch < 2)
 	{
 		tnum = launch;
-		while (tnum < (int)cfg->tnum)
+		while (tnum < cfg->args.tnum)
 		{
-			gettimeofday(&tinfo[tnum].tv_start, NULL);
+			tinfo[tnum].ms_start = get_ms();
 			if (pthread_create(&threads[tnum], NULL, lifecycle_start, &tinfo[tnum]))
 				exit_error("pthread_create(): Failure allocating thread");
 			pthread_detach(threads[tnum]);

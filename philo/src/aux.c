@@ -1,14 +1,5 @@
 #include "philo.h"
 
-inline uint64_t	ms(struct timeval *from)
-{
-	struct timeval	now;
-
-	gettimeofday(&now, NULL);
-	return ((now.tv_sec - from->tv_sec) * 1000\
-			 + (now.tv_usec - from->tv_usec) / 1000);
-}
-
 void	*xmalloc(size_t size)
 {
 	void	*p;
@@ -25,25 +16,31 @@ long get_ms()
 
 	gettimeofday(&now, NULL);
 	return ((now.tv_sec) * (long int)1000 + (now.tv_usec) / 1000);
-
-
 }
 
-bool	msleep(int tt_sleep, t_tinfo *tinfo) // 1 ms погрешность
+bool	msleep(long tt_sleep, t_tinfo *tinfo)
 {
-	long start = get_ms();
 	long offset = 0;
+	long start = get_ms();
 	
 	while (offset < tt_sleep)
 	{
 		offset = get_ms() - start;
 		if (should_die(tinfo))
 			return (RETURN_FAILURE);
-		usleep(70);
+		usleep(100);
 	}
 	return (RETURN_SUCCESS);
 }
 /*
+inline uint64_t	ms(struct timeval *from)
+{
+	struct timeval	now;
+
+	gettimeofday(&now, NULL);
+	return ((now.tv_sec - from->tv_sec) * 1000\
+			 + (now.tv_usec - from->tv_usec) / 1000);
+}
 bool	msleep(int tt_sleep, t_tinfo *tinfo) // 1 ms погрешность
 {
 	struct timeval	now;

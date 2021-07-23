@@ -2,13 +2,14 @@
 
 void	start_monitoring(t_config *cfg)
 {
-	while (!cfg->f_death && cfg->iter_completed != cfg->tnum)
-	{
-		usleep(10000);
-	}
+	while (!cfg->f_death && cfg->iter_completed != cfg->args.tnum)
+		usleep(1000);
 }
 
-bool should_die(t_tinfo *tinfo)
+inline bool should_die(t_tinfo *tinfo)
 {
-	return (ms(&tinfo->tv_last_eat) > (uint64_t)tinfo->tt_die);
+	long	now;
+
+	now = get_ms();
+	return (tinfo->args->tt_die < now - tinfo->ms_last_eat);
 }

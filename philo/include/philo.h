@@ -45,11 +45,12 @@ void		*lifecycle_start(void *arg);
 /*		aux.c						*/
 void		*xmalloc(size_t size);
 void		exit_error(const char *message);
-uint64_t	ms(struct timeval *from);
-bool		msleep(int tt_sleep, t_tinfo *tinfo);
+long		get_ms();
+bool		msleep(long tt_sleep, t_tinfo *tinfo);
+//uint64_t	ms(struct timeval *from);
 
 /*		ft.c						*/
-uint64_t	_atoi64(const char *nptr);
+long 		_atol(const char *nptr);
 size_t		_strlen(const char *s);
 bool		_isdigit(char c);
 
