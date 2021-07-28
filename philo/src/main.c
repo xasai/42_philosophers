@@ -34,7 +34,7 @@ static void	run(t_config *cfg)
 		tnum = launch;
 		while (tnum < (int)cfg->tnum)
 		{
-			gettimeofday(&tinfo[tnum].tv_start, NULL);
+//			gettimeofday(&tinfo[tnum].tv_start, NULL);
 			if (pthread_create(&threads[tnum], NULL, lifecycle_start, &tinfo[tnum]))
 				exit_error("pthread_create(): Failure allocating thread");
 			pthread_detach(threads[tnum]);

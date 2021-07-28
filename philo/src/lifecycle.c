@@ -1,8 +1,15 @@
 #include "philo.h"
 
-inline static void _echo_status(const char *action, t_tinfo *tinfo)
+//#define _VERBOSE
+
+static void _echo_status(const char *action, t_tinfo *tinfo)
 {
-	printf("%ld %ld %s\n", ms(&tinfo->tv_start), tinfo->id, action);
+#ifdef _VERBOSE
+	printf("%ld %ld %s (now:%ld | last eat:%ld)\n", ms(&tinfo.tv_start), \
+			tinfo->id, action, ms_now, to_ms(&tinfo->tv_last_eat));
+#else
+	printf("%ld %ld %s\n", get_ms() - to_ms(&tinfo->tv_start), tinfo->id, action);
+#endif
 }
 
 inline static void *die(t_tinfo *tinfo)
@@ -10,7 +17,8 @@ inline static void *die(t_tinfo *tinfo)
 	if (*tinfo->f_death)
 		return (NULL);
 	_echo_status("died", tinfo);
-	printf("from last eat %ld \n", ms(&tinfo->tv_last_eat));
+	printf("from last eat %ld \n", get_ms() - to_ms(&tinfo->tv_last_eat)); //FIXME
+	*tinfo->iter_completed += 1;
 	*tinfo->f_death = true;
 	return (NULL);
 }
@@ -46,6 +54,7 @@ void	*lifecycle_start(void *arg)
 	t_tinfo	*tinfo;
 
 	tinfo = arg;
+	gettimeofday(&tinfo->tv_start, NULL);
 	tinfo->tv_last_eat = tinfo->tv_start;
 	while (!*tinfo->f_death && tinfo->iter_max)
 	{

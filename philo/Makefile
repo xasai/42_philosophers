@@ -16,6 +16,7 @@ PHILO_INC := -Iinclude
 ############################################################################################ 
 CC := gcc
 CFLAGS := -Wall -Wextra -Werror -MMD -MP -Ofast -pthread -pedantic-errors
+#CFLAGS += -D_VERBOSE
  #_____    _____    _____ 
 #/ ____|  / ____|  / ____|
 #| |  __  | |      | |     
@@ -29,7 +30,6 @@ CFLAGS := -Wall -Wextra -Werror -MMD -MP -Ofast -pthread -pedantic-errors
 	#@echo OBJDIR: $(OBJDIR)
 
 all: $(NAME)
-
 
 $(NAME): $(OBJPATH) $(BINPATH) $(PHILO)
 
@@ -50,7 +50,6 @@ $(OBJPATH):
 	$(green)	
 	mkdir -p $(OBJDIR) 
 	$(reset)
-
 
 clean:
 	$(red)
