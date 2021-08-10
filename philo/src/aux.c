@@ -10,7 +10,7 @@ void	*xmalloc(size_t size)
 	return (memset(p, 0, size));
 }
 
-void exit_error(const char *message)
+void	exit_error(const char *message)
 {
 	if (message)
 		write(STDERR_FILENO, message, _strlen(message));
@@ -18,3 +18,30 @@ void exit_error(const char *message)
 	exit (EXIT_FAILURE);
 }
 
+size_t	_strlen(const char *s)
+{
+	size_t	i;
+
+	i = 0;
+	while (s[i])
+		i++;
+	return (i);
+}
+
+inline bool	_isdigit(char c)
+{
+	return (c >= '0' && c <= '9');
+}
+
+long	_atol(const char *nptr)
+{
+	long	num;
+
+	num = 0;
+	while (_isdigit(*nptr))
+	{
+		num = num * 10 + *nptr - '0';
+		nptr++;
+	}
+	return (num);
+}
