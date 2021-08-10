@@ -1,4 +1,4 @@
-#include "philo.h" 
+#include "philo.h"
 
 static int	_handle_args(int ac, char **av)
 {
@@ -19,39 +19,51 @@ static int	_handle_args(int ac, char **av)
 	return (RETURN_SUCCESS);
 }
 
-static void	run(t_config *cfg)
+inline static void	_clear(t_external_data *xdp)
 {
-	long			tnum;
-	short int		launch;
-	t_tinfo			*tinfo;
-	pthread_t		*threads;
+	long	idx;
 
-	launch = 0;
-	tinfo =	cfg->tinfo;
-	threads = cfg->threads;
-	while (launch < 2)
+	usleep(20000);
+	idx = 0;
+	while (idx < xdp->argv[TNUM])
 	{
-		tnum = launch;
-		while (tnum < cfg->args.tnum)
-		{
-			tinfo[tnum].ms_start = get_ms();
-			if (pthread_create(&threads[tnum], NULL, lifecycle_start, &tinfo[tnum]))
-				exit_error("pthread_create(): Failure allocating thread");
-			pthread_detach(threads[tnum]);
-			tnum += 2;
-		}
-		launch++;
+		pthread_mutex_destroy(&xdp->atomic_mutexes[idx]);
+		pthread_mutex_destroy(&xdp->unatomic_mutexes[idx]);
+		idx++;
 	}
-	start_monitoring(cfg);
+	free(xdp->thr_infos);
+	free(xdp->atomic_mutexes);
+	free(xdp->unatomic_mutexes);
+}
+
+inline static void	_run(t_external_data *xdp)
+{
+	long		idx;
+	pthread_t	sched;
+
+	idx = 0;
+	while (idx < xdp->argv[TNUM])
+	{
+		if (pthread_create(&xdp->threads[idx], NULL,
+				thread_entrypoint, &xdp->thr_infos[idx]))
+		{
+			exit_error("pthread_create() failure");
+		}
+		pthread_detach(xdp->threads[idx]);
+		idx++;
+	}
+	if (pthread_create(&sched, NULL, sched_entrypoint, xdp))
+		exit_error("pthread_create() failure");
+	pthread_join(sched, NULL);
+	_clear(xdp);
 }
 
 int	main(int ac, char **av)
 {
-	t_config	cfg;
+	t_external_data	xd;
 
 	_handle_args(ac, av);
-	cfg = configuration_init(av);
-	tinfo_init(&cfg);
-	run(&cfg);
-	return (EXIT_SUCCESS);
+	init(&xd, av);
+	_run(&xd);
+	exit(RETURN_SUCCESS);
 }

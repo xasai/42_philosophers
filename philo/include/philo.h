@@ -18,40 +18,39 @@
 							pthread_mutex_unlock
 						*/
 
-#include <sys/types.h>
-#include <stdint.h>
-#include <stdbool.h>
+# include <sys/types.h>
+# include <stdint.h>
+# include <stdbool.h>
 
-# include "t_tinfo.h"
-# include "t_config.h"
+# include "t_thrinfo.h"
+# include "t_external_data.h"
 
 # define EXIT_SUCCESS 0 
 # define EXIT_FAILURE 1 
 # define RETURN_SUCCESS EXIT_SUCCESS
 # define RETURN_FAILURE EXIT_FAILURE
 
-/*		init.c						*/
-void		tinfo_init(t_config *cfg);
-t_config	configuration_init(char **av);
+//init.c
+void		init(t_external_data *xdp, char **av);
 
-/*		monitor.c					*/
-void		start_monitoring(t_config *cfg);
-bool		should_die(t_tinfo *tinfo);
+//lifecycle.c
+void		*thread_entrypoint(void *arg);
+bool		should_die(t_thrinfo *ti);
 
-/*		lifecycle.c					*/
-void		*lifecycle_start(void *arg);
+//sched.c
+void		*sched_entrypoint(void *arg);
 
+//time.c
+long		get_ms(void);
+bool		msleep(long ms_duration, t_thrinfo *ti);
 
-/*		aux.c						*/
+//aux.c
 void		*xmalloc(size_t size);
 void		exit_error(const char *message);
-long		get_ms();
-bool		msleep(long tt_sleep, t_tinfo *tinfo);
-//uint64_t	ms(struct timeval *from);
 
-/*		ft.c						*/
-long 		_atol(const char *nptr);
+//ft.c
 size_t		_strlen(const char *s);
+long		_atol(const char *nptr);
 bool		_isdigit(char c);
 
 #endif

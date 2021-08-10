@@ -32,7 +32,6 @@ CFLAGS += -Ofast
 
 all: $(NAME)
 
-
 $(NAME): $(OBJPATH) $(BINPATH) $(PHILO)
 
 $(PHILO): $(PHILO_OBJ)
@@ -52,7 +51,6 @@ $(OBJPATH):
 	$(green)	
 	mkdir -p $(OBJDIR) 
 	$(reset)
-
 
 clean:
 	$(red)
