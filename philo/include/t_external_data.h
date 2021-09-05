@@ -14,14 +14,18 @@
 
 typedef struct s_external_data
 {
-	long				argv[MAX_PARAMS];
+	int  				jobsnum;
+	int  				tt_die;
+	int  				tt_eat;
+	int  				tt_sleep;
+	int  				max_iter;
 	bool				f_death;
-	int					threads_done;
+	int					workers;
 	int					*seq;
+	struct s_thrinfo	*tinfos;
 	pthread_t			*threads;
-	pthread_mutex_t		*atomic_mutexes;
-	pthread_mutex_t		*unatomic_mutexes;
-	struct s_thrinfo	*thr_infos;
+	pthread_mutex_t		*atom_muxs;
+	pthread_mutex_t		*unatom_muxs;
 }					t_external_data;
 
 #endif /* T_EXTERNAL_DATA_H */

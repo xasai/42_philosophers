@@ -19,43 +19,41 @@ static int	_handle_args(int ac, char **av)
 	return (RETURN_SUCCESS);
 }
 
-inline static void	_clear(t_external_data *xdp)
+static void	_xdp_clear(t_external_data *xdp)
 {
 	long	idx;
 
-	usleep(20000);
+	//usleep(20000);
 	idx = 0;
-	while (idx < xdp->argv[TNUM])
+	while (idx < xdp->jobsnum)
 	{
-		pthread_mutex_destroy(&xdp->atomic_mutexes[idx]);
-		pthread_mutex_destroy(&xdp->unatomic_mutexes[idx]);
+		pthread_mutex_destroy(&xdp->atom_muxs[idx]);
+		pthread_mutex_destroy(&xdp->unatom_muxs[idx]);
 		idx++;
 	}
-	free(xdp->thr_infos);
-	free(xdp->atomic_mutexes);
-	free(xdp->unatomic_mutexes);
+	free(xdp->tinfos);
+	free(xdp->atom_muxs);
+	free(xdp->unatom_muxs);
 }
 
 inline static void	_run(t_external_data *xdp)
 {
-	long		idx;
-	pthread_t	sched;
+	int 		idx;
+	int			err;
 
 	idx = 0;
-	while (idx < xdp->argv[TNUM])
+	while (idx < xdp->jobsnum)
 	{
-		if (pthread_create(&xdp->threads[idx], NULL,
-				thread_entrypoint, &xdp->thr_infos[idx]))
-		{
+		err = pthread_create(&xdp->threads[idx], NULL, 
+				thread_entrypoint, &xdp->tinfos[idx]);
+		if (err)
 			exit_error("pthread_create() failure");
-		}
+		xdp->workers++;
 		pthread_detach(xdp->threads[idx]);
 		idx++;
 	}
-	if (pthread_create(&sched, NULL, sched_entrypoint, xdp))
-		exit_error("pthread_create() failure");
-	pthread_join(sched, NULL);
-	_clear(xdp);
+	schedule(xdp);
+	_xdp_clear(xdp);
 }
 
 int	main(int ac, char **av)

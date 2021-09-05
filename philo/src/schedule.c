@@ -1,63 +1,69 @@
 #include "philo.h"
 
-#define _VERBOSE 1
-inline static void	_run_jobs(int job_idx, int jobs_max, t_external_data *xdp)
+#define DEATH 1 
+#define ALIVE 0 
+
+inline static void	
+_launch_workers(int worker_idx, int max_workers, t_external_data *xdp)
 {
 	int	idx;
 	int	thread_idx;
 
 	idx = 0;
-	while (idx < jobs_max)
+	while (idx < max_workers)
 	{
-		thread_idx = xdp->seq[((job_idx + idx) % xdp->argv[TNUM])];
-		pthread_mutex_unlock(&xdp->atomic_mutexes[thread_idx]);
-		if (_VERBOSE)
-			printf("=====================>%d\n", thread_idx + 1);
+		thread_idx = xdp->seq[(worker_idx + idx) % xdp->jobsnum];
+		pthread_mutex_unlock(&xdp->atom_muxs[thread_idx]);
+		printf("ALLOWED ===>%d\n", thread_idx+1);
 		idx++;
 	}
-	idx = 0;
+	usleep(200);
+	idx= 0;
+	while (idx < max_workers)
+	{
+		thread_idx = xdp->seq[((worker_idx + idx) % xdp->jobsnum)];
+		pthread_mutex_lock(&xdp->atom_muxs[thread_idx]);
+		printf("DONE ===>%d\n", thread_idx+1);
+		idx++;
+	}
+	
 }
 
-inline static int	_death_watcher(t_external_data *xdp)
+inline static int	_workers_status(t_external_data *xdp)
 {
-	long		thr_idx;
+	int			job_idx;
 	t_thrinfo	*ti;
 
-	thr_idx = 0;
-	while (thr_idx < xdp->argv[TNUM])
+	job_idx = 0;
+	while (job_idx < xdp->jobsnum)
 	{
-		ti = &xdp->thr_infos[thr_idx];
-		if (xdp->threads_done == xdp->argv[TNUM])
-			return (RETURN_FAILURE);
+		ti = &xdp->tinfos[job_idx];
+		if (xdp->workers == 0)
+			return (DEATH);
 		else if (xdp->f_death == false && should_die(ti))
 		{
-			xdp->threads_done++;
+			xdp->workers--;
 			xdp->f_death = true;
 			printf("%ld %d Died\n", get_ms() - ti->ms_start, ti->id);
-			return (RETURN_FAILURE);
+			return (DEATH);
 		}
-		thr_idx++;
+		job_idx++;
 	}
-	return (RETURN_SUCCESS);
+	return (ALIVE);
 }
 
-void	*sched_entrypoint(void *arg)
+void	schedule(t_external_data *xdp)
 {
-	int				job_idx;
-	int				jobs_max;
-	t_external_data	*xdp;
+	int				worker_idx;
+	int				max_workers;
 
-	xdp = arg;
-	job_idx = 0;
-	jobs_max = xdp->argv[TNUM] / 2;
+	worker_idx = 0;
+	max_workers= xdp->jobsnum / 2;
 	while (!xdp->f_death)
 	{
-		_run_jobs(job_idx, jobs_max, xdp);
-		msleep(xdp->argv[EAT], &xdp->thr_infos[0]);
-		job_idx += jobs_max;
-		job_idx %= xdp->argv[TNUM];
-		if (_death_watcher(xdp) == RETURN_FAILURE)
+		_launch_workers(worker_idx, max_workers, xdp);
+		worker_idx = (worker_idx + max_workers) % xdp->jobsnum;
+		if (_workers_status(xdp) == DEATH)
 			break ;
 	}
-	return (NULL);
 }

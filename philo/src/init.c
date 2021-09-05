@@ -5,21 +5,21 @@ inline static void	_init_queue(t_external_data *xdp)
 {
 	int		*seq;
 	int		seq_idx;	
-	int		thr_idx;
+	int		job_idx;
 
-	thr_idx = 0;
+	job_idx= 0;
 	seq_idx = 0;
-	seq = xmalloc(sizeof(*seq) * xdp->argv[TNUM]);
-	while (thr_idx < xdp->argv[TNUM])
+	seq = xmalloc(sizeof(*seq) * xdp->jobsnum);
+	while (job_idx < xdp->jobsnum)
 	{
-		seq[seq_idx++] = thr_idx;
-		thr_idx += 2;
+		seq[seq_idx++] = job_idx;
+		job_idx += 2;
 	}
-	thr_idx = 1;
-	while (thr_idx < xdp->argv[TNUM])
+	job_idx = 1;
+	while (job_idx < xdp->jobsnum)
 	{
-		seq[seq_idx++] = thr_idx;
-		thr_idx += 2;
+		seq[seq_idx++] = job_idx;
+		job_idx += 2;
 	}
 	xdp->seq = seq;
 }
@@ -28,42 +28,42 @@ inline static void	_init_thread_data(t_external_data *xdp, long idx)
 {
 	t_thrinfo	*ti;
 
-	ti = &xdp->thr_infos[idx];
+	ti = &xdp->tinfos[idx];
 	ti->xdp = xdp;
 	ti->id = idx + 1;
-	ti->atomic_mutex = &xdp->atomic_mutexes[idx];
-	ti->unatomic_mutex1 = &xdp->unatomic_mutexes[idx];
-	if (idx == 0)
-		idx = xdp->argv[TNUM];
-	ti->unatomic_mutex2 = &xdp->unatomic_mutexes[idx - 1];
+	ti->atomic_mutex = &xdp->atom_muxs[idx];
+	ti->unatomic_mutex1 = &xdp->unatom_muxs[idx];
+	if (idx != 0)
+		ti->unatomic_mutex2 = &xdp->unatom_muxs[xdp->jobsnum - 1]; 
+	else
+		ti->unatomic_mutex2 = &xdp->unatom_muxs[idx - 1]; 
 	if (pthread_mutex_init(ti->atomic_mutex, NULL)
-		|| pthread_mutex_init(ti->unatomic_mutex1, NULL)
-		|| pthread_mutex_init(ti->unatomic_mutex2, NULL))
+		|| pthread_mutex_init(ti->unatomic_mutex1, NULL))
 	{
 		exit_error("pthread_mutex_init() failure");
 	}
-	ti->ms_start = get_ms();
-	ti->ms_last_eat = ti->ms_start;
+	//ti->ms_start = get_ms();
+	//ti->ms_last_eat = ti->ms_start;
 	pthread_mutex_lock(ti->atomic_mutex);
 }
 
 inline static void	_init_external_data(t_external_data *xdp, char **av)
 {
-	*xdp = (t_external_data){.argv[MAX_ITER] = -1};
-	xdp->argv[TNUM] = _atol(av[1]);
-	if (xdp->argv[TNUM] == 0)
+	*xdp = (t_external_data){0};
+	xdp->jobsnum = _atol(av[1]);
+	if (xdp->jobsnum == 0)
 		exit_error("First argument should be positive not zero num.");
-	xdp->argv[DIE] = _atol(av[2]);
-	xdp->argv[EAT] = _atol(av[3]);
-	xdp->argv[SLEEP] = _atol(av[4]);
+	xdp->tt_die = _atol(av[2]);
+	xdp->tt_eat = _atol(av[3]);
+	xdp->tt_sleep = _atol(av[4]);
 	if (av[5])
-		xdp->argv[MAX_ITER] = _atol(av[5]);
-	xdp->threads = xmalloc(sizeof(*xdp->threads) * xdp->argv[TNUM]);
-	xdp->thr_infos = xmalloc(sizeof(*xdp->thr_infos) * xdp->argv[TNUM]);
-	xdp->atomic_mutexes = xmalloc(sizeof(*xdp->atomic_mutexes)
-			* xdp->argv[TNUM]);
-	xdp->unatomic_mutexes = xmalloc(sizeof(*xdp->unatomic_mutexes)
-			* xdp->argv[TNUM]);
+		xdp->max_iter = _atol(av[5]);
+	else 
+		xdp->max_iter = -1;
+	xdp->threads = xmalloc(sizeof(*xdp->threads) * xdp->jobsnum);
+	xdp->tinfos = xmalloc(sizeof(*xdp->tinfos) * xdp->jobsnum);
+	xdp->atom_muxs = xmalloc(sizeof(*xdp->atom_muxs) * xdp->jobsnum);
+	xdp->unatom_muxs = xmalloc(sizeof(*xdp->unatom_muxs) * xdp->jobsnum);
 }
 
 void	init(t_external_data *xdp, char **av)
@@ -73,6 +73,6 @@ void	init(t_external_data *xdp, char **av)
 	idx = 0;
 	_init_external_data(xdp, av);
 	_init_queue(xdp);
-	while (idx < xdp->argv[TNUM])
+	while (idx < xdp->jobsnum)
 		_init_thread_data(xdp, idx++);
 }

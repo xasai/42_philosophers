@@ -16,8 +16,8 @@ PHILO_INC := -Iinclude
 ############################################################################################ 
 CC := gcc
 CFLAGS := -Wall -Wextra -Werror -MMD -MP -pthread -pedantic-errors
-CFLAGS += -Ofast 
-#CFLAGS += -g3 #FIXME
+#CFLAGS += -Ofast 
+CFLAGS += -g3 #FIXME
  #_____    _____    _____ 
 #/ ____|  / ____|  / ____|
 #| |  __  | |      | |     
@@ -26,9 +26,6 @@ CFLAGS += -Ofast
  #\_____|  \____|  \_____|
 ############################################################################################
 
-	#@echo PHILO_SRC: $(PHILO_SRC)
-	#@echo PHILO_OBJ: $(PHILO_OBJ)
-	#@echo OBJDIR: $(OBJDIR)
 
 all: $(NAME)
 
@@ -71,6 +68,9 @@ run:
 .PHONY:  all run re fclean clean 
 
 ############################################################################################
+
+#Dependencies
+
 ifeq ($(MAKECMDGOALS),clean)
 DEPFILES :=
 else ifeq ($(MAKECMDGOALS),fclean)

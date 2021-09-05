@@ -38,7 +38,7 @@ void		*thread_entrypoint(void *arg);
 bool		should_die(t_thrinfo *ti);
 
 //sched.c
-void		*sched_entrypoint(void *arg);
+void		schedule(t_external_data *arg);
 
 //time.c
 long		get_ms(void);
