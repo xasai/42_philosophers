@@ -23,7 +23,6 @@ static void	_xdp_clear(t_external_data *xdp)
 {
 	long	idx;
 
-	//usleep(20000);
 	idx = 0;
 	while (idx < xdp->jobsnum)
 	{
@@ -31,24 +30,25 @@ static void	_xdp_clear(t_external_data *xdp)
 		pthread_mutex_destroy(&xdp->unatom_muxs[idx]);
 		idx++;
 	}
+	free(xdp->seq);
 	free(xdp->tinfos);
+	free(xdp->threads);
 	free(xdp->atom_muxs);
 	free(xdp->unatom_muxs);
 }
 
-inline static void	_run(t_external_data *xdp)
+static void	_run(t_external_data *xdp)
 {
-	int 		idx;
+	int			idx;
 	int			err;
 
 	idx = 0;
 	while (idx < xdp->jobsnum)
 	{
-		err = pthread_create(&xdp->threads[idx], NULL, 
+		err = pthread_create(&xdp->threads[idx], NULL,
 				thread_entrypoint, &xdp->tinfos[idx]);
 		if (err)
 			exit_error("pthread_create() failure");
-		xdp->workers++;
 		pthread_detach(xdp->threads[idx]);
 		idx++;
 	}
@@ -63,5 +63,5 @@ int	main(int ac, char **av)
 	_handle_args(ac, av);
 	init(&xd, av);
 	_run(&xd);
-	exit(RETURN_SUCCESS);
+	return (RETURN_SUCCESS);
 }

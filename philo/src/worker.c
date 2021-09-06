@@ -1,70 +1,68 @@
 #include "philo.h"
 
-inline bool	should_die(t_thrinfo *ti)
+#define ALIVE 0 
+#define DEATH 1
+
+inline static void	_echo_status(const char *acinfon, t_thrinfo *inf)
 {
-	return (get_ms() - ti->ms_last_eat > ti->xdp->tt_die);
+	if (!inf->xdp->f_death)
+		printf("%ld %d %s\n", get_ms() - inf->ms_start, inf->id, acinfon);
 }
 
-inline static void	_echo_status(const char *action, t_thrinfo *ti)
+inline static void	*_die(t_thrinfo *inf)
 {
-	if (!ti->xdp->f_death)
-		printf("%ld %d %s\n", get_ms() - ti->ms_start, ti->id, action);
-}
-
-inline static void	*_die(t_thrinfo *ti)
-{
-	ti->xdp->workers--;
-	if (ti->xdp->f_death)
+	pthread_mutex_unlock(inf->atomic_mutex);
+	pthread_mutex_unlock(inf->unatomic_mutex1);
+	pthread_mutex_unlock(inf->unatomic_mutex2);
+	if (inf->xdp->f_death)
 		return (NULL);
-	ti->xdp->f_death = true;
-	printf("%ld %d died\n", get_ms() - ti->ms_start, ti->id);
+	inf->xdp->f_death = true;
+	printf("%ld %d died\n", get_ms() - inf->ms_start, inf->id);
 	return (NULL);
 }
 
-inline static bool	_eat(t_thrinfo *ti)
+inline static bool	_eat(t_thrinfo *inf)
 {
-	pthread_mutex_lock(ti->atomic_mutex);
-	pthread_mutex_lock(ti->unatomic_mutex1);
-	if (ti->xdp->f_death || should_die(ti))
-		return (RETURN_FAILURE);
-	_echo_status("has taken a fork", ti);
-	pthread_mutex_lock(ti->unatomic_mutex2);
-	if (ti->xdp->f_death || should_die(ti))
-		return (RETURN_FAILURE);
-	_echo_status("has taken a fork", ti);
-	_echo_status("is eating", ti);
-	ti->ms_last_eat = get_ms();
-	if (msleep(ti->xdp->tt_eat, ti))
-		return (RETURN_FAILURE);
-	pthread_mutex_unlock(ti->atomic_mutex);
-	pthread_mutex_unlock(ti->unatomic_mutex1);
-	pthread_mutex_unlock(ti->unatomic_mutex2);
-	return (RETURN_SUCCESS);
+	pthread_mutex_lock(inf->atomic_mutex);
+	pthread_mutex_lock(inf->unatomic_mutex1);
+	if (inf->xdp->f_death || should_die(inf))
+		return (DEATH);
+	_echo_status("has taken a fork", inf);
+	pthread_mutex_lock(inf->unatomic_mutex2);
+	if (inf->xdp->f_death || should_die(inf))
+		return (DEATH);
+	_echo_status("has taken a fork", inf);
+	_echo_status("is eating", inf);
+	inf->ms_last_eat = get_ms();
+	if (msleep(inf->xdp->tt_eat, inf))
+		return (DEATH);
+	pthread_mutex_unlock(inf->atomic_mutex);
+	pthread_mutex_unlock(inf->unatomic_mutex1);
+	pthread_mutex_unlock(inf->unatomic_mutex2);
+	return (ALIVE);
 }
 
 void	*thread_entrypoint(void *arg)
 {
 	int				i;
-	t_thrinfo		*t_info;
+	t_thrinfo		*inf;
 
 	i = 0;
-	t_info = arg;
-	t_info->ms_start = get_ms();
-	t_info->ms_last_eat = t_info->ms_start;
-	while (!t_info->xdp->f_death && t_info->xdp->max_iter != i)
+	inf = arg;
+	inf->ms_start = get_ms();
+	inf->ms_last_eat = inf->ms_start;
+	while (!inf->xdp->f_death && inf->xdp->max_iter != i)
 	{
-		_echo_status("is thinking", t_info);
-		if (_eat(t_info))
-			return (_die(t_info));
+		_echo_status("is thinking", inf);
+		if (_eat(inf) == DEATH)
+			return (_die(inf));
 		i++;
-
-		//fade i times
-		if (t_info->xdp->max_iter == i)
+		if (inf->xdp->max_iter == i)
 			break ;
-		_echo_status("is sleeping", t_info);
-		if (msleep(t_info->xdp->tt_sleep, t_info))
-			return (_die(t_info));
+		_echo_status("is sleeping", inf);
+		if (msleep(inf->xdp->tt_sleep, inf) == DEATH)
+			return (_die(inf));
 	}
-	t_info->xdp->workers--;
+	inf->xdp->threads_done++;
 	return (NULL);
 }

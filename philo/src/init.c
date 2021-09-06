@@ -1,5 +1,4 @@
 #include "philo.h"
-#include <stdio.h>
 
 inline static void	_init_queue(t_external_data *xdp)
 {
@@ -7,7 +6,7 @@ inline static void	_init_queue(t_external_data *xdp)
 	int		seq_idx;	
 	int		job_idx;
 
-	job_idx= 0;
+	job_idx = 0;
 	seq_idx = 0;
 	seq = xmalloc(sizeof(*seq) * xdp->jobsnum);
 	while (job_idx < xdp->jobsnum)
@@ -33,17 +32,15 @@ inline static void	_init_thread_data(t_external_data *xdp, long idx)
 	ti->id = idx + 1;
 	ti->atomic_mutex = &xdp->atom_muxs[idx];
 	ti->unatomic_mutex1 = &xdp->unatom_muxs[idx];
-	if (idx != 0)
-		ti->unatomic_mutex2 = &xdp->unatom_muxs[xdp->jobsnum - 1]; 
+	if (idx == 0)
+		ti->unatomic_mutex2 = &xdp->unatom_muxs[xdp->jobsnum - 1];
 	else
-		ti->unatomic_mutex2 = &xdp->unatom_muxs[idx - 1]; 
+		ti->unatomic_mutex2 = &xdp->unatom_muxs[idx - 1];
 	if (pthread_mutex_init(ti->atomic_mutex, NULL)
 		|| pthread_mutex_init(ti->unatomic_mutex1, NULL))
 	{
 		exit_error("pthread_mutex_init() failure");
 	}
-	//ti->ms_start = get_ms();
-	//ti->ms_last_eat = ti->ms_start;
 	pthread_mutex_lock(ti->atomic_mutex);
 }
 
@@ -58,7 +55,7 @@ inline static void	_init_external_data(t_external_data *xdp, char **av)
 	xdp->tt_sleep = _atol(av[4]);
 	if (av[5])
 		xdp->max_iter = _atol(av[5]);
-	else 
+	else
 		xdp->max_iter = -1;
 	xdp->threads = xmalloc(sizeof(*xdp->threads) * xdp->jobsnum);
 	xdp->tinfos = xmalloc(sizeof(*xdp->tinfos) * xdp->jobsnum);

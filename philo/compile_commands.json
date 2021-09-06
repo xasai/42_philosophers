@@ -1,0 +1,116 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/x86_64-linux-gnu-gcc-10",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-pthread",
+      "-pedantic-errors",
+      "-g3",
+      "-Iinclude",
+      "-c",
+      "src/aux.c",
+      "-o",
+      "obj/aux.o"
+    ],
+    "directory": "/home/masai/Documents/learn/42/philo/philo",
+    "file": "/home/masai/Documents/learn/42/philo/philo/src/aux.c",
+    "output": "/home/masai/Documents/learn/42/philo/philo/obj/aux.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/x86_64-linux-gnu-gcc-10",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-pthread",
+      "-pedantic-errors",
+      "-g3",
+      "-Iinclude",
+      "-c",
+      "src/init.c",
+      "-o",
+      "obj/init.o"
+    ],
+    "directory": "/home/masai/Documents/learn/42/philo/philo",
+    "file": "/home/masai/Documents/learn/42/philo/philo/src/init.c",
+    "output": "/home/masai/Documents/learn/42/philo/philo/obj/init.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/x86_64-linux-gnu-gcc-10",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-pthread",
+      "-pedantic-errors",
+      "-g3",
+      "-Iinclude",
+      "-c",
+      "src/main.c",
+      "-o",
+      "obj/main.o"
+    ],
+    "directory": "/home/masai/Documents/learn/42/philo/philo",
+    "file": "/home/masai/Documents/learn/42/philo/philo/src/main.c",
+    "output": "/home/masai/Documents/learn/42/philo/philo/obj/main.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/x86_64-linux-gnu-gcc-10",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-pthread",
+      "-pedantic-errors",
+      "-g3",
+      "-Iinclude",
+      "-c",
+      "src/schedule.c",
+      "-o",
+      "obj/schedule.o"
+    ],
+    "directory": "/home/masai/Documents/learn/42/philo/philo",
+    "file": "/home/masai/Documents/learn/42/philo/philo/src/schedule.c",
+    "output": "/home/masai/Documents/learn/42/philo/philo/obj/schedule.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/x86_64-linux-gnu-gcc-10",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-pthread",
+      "-pedantic-errors",
+      "-g3",
+      "-Iinclude",
+      "-c",
+      "src/time.c",
+      "-o",
+      "obj/time.o"
+    ],
+    "directory": "/home/masai/Documents/learn/42/philo/philo",
+    "file": "/home/masai/Documents/learn/42/philo/philo/src/time.c",
+    "output": "/home/masai/Documents/learn/42/philo/philo/obj/time.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/x86_64-linux-gnu-gcc-10",
+      "-Wall",
+      "-Wextra",
+      "-Werror",
+      "-pthread",
+      "-pedantic-errors",
+      "-g3",
+      "-Iinclude",
+      "-c",
+      "src/worker.c",
+      "-o",
+      "obj/worker.o"
+    ],
+    "directory": "/home/masai/Documents/learn/42/philo/philo",
+    "file": "/home/masai/Documents/learn/42/philo/philo/src/worker.c",
+    "output": "/home/masai/Documents/learn/42/philo/philo/obj/worker.o"
+  }
+]

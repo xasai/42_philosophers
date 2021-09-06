@@ -28,7 +28,7 @@ size_t	_strlen(const char *s)
 	return (i);
 }
 
-inline bool	_isdigit(char c)
+bool	_isdigit(char c)
 {
 	return (c >= '0' && c <= '9');
 }

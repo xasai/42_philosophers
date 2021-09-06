@@ -1,10 +1,17 @@
 #include "philo.h"
+#include "t_external_data.h"
+#include <pthread.h>
 
 #define DEATH 1 
 #define ALIVE 0 
 
+inline bool	should_die(t_thrinfo *inf)
+{
+	return (get_ms() - inf->ms_last_eat > inf->xdp->tt_die);
+}
+
 inline static void	
-_launch_workers(int worker_idx, int max_workers, t_external_data *xdp)
+	_launch_workers(int worker_idx, int max_workers, t_external_data *xdp)
 {
 	int	idx;
 	int	thread_idx;
@@ -14,19 +21,16 @@ _launch_workers(int worker_idx, int max_workers, t_external_data *xdp)
 	{
 		thread_idx = xdp->seq[(worker_idx + idx) % xdp->jobsnum];
 		pthread_mutex_unlock(&xdp->atom_muxs[thread_idx]);
-		printf("ALLOWED ===>%d\n", thread_idx+1);
 		idx++;
 	}
 	usleep(200);
-	idx= 0;
+	idx = 0;
 	while (idx < max_workers)
 	{
 		thread_idx = xdp->seq[((worker_idx + idx) % xdp->jobsnum)];
 		pthread_mutex_lock(&xdp->atom_muxs[thread_idx]);
-		printf("DONE ===>%d\n", thread_idx+1);
 		idx++;
 	}
-	
 }
 
 inline static int	_workers_status(t_external_data *xdp)
@@ -38,11 +42,10 @@ inline static int	_workers_status(t_external_data *xdp)
 	while (job_idx < xdp->jobsnum)
 	{
 		ti = &xdp->tinfos[job_idx];
-		if (xdp->workers == 0)
+		if (xdp->f_death || xdp->threads_done == xdp->jobsnum)
 			return (DEATH);
-		else if (xdp->f_death == false && should_die(ti))
+		if (xdp->f_death == false && should_die(ti))
 		{
-			xdp->workers--;
 			xdp->f_death = true;
 			printf("%ld %d Died\n", get_ms() - ti->ms_start, ti->id);
 			return (DEATH);
@@ -58,7 +61,7 @@ void	schedule(t_external_data *xdp)
 	int				max_workers;
 
 	worker_idx = 0;
-	max_workers= xdp->jobsnum / 2;
+	max_workers = xdp->jobsnum / 2;
 	while (!xdp->f_death)
 	{
 		_launch_workers(worker_idx, max_workers, xdp);

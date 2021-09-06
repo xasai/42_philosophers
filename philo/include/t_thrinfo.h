@@ -15,4 +15,4 @@ typedef struct s_thrinfo
 	struct s_external_data	*xdp;
 }					t_thrinfo;
 
-#endif	/* T_THRINFO_H */
+#endif
