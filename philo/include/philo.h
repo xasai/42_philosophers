@@ -45,4 +45,7 @@ size_t		_strlen(const char *s);
 long		_atol(const char *nptr);
 bool		_isdigit(char c);
 
+//debug.c
+void		debug_info(t_external_data *xd);
+
 #endif

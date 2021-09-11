@@ -6,9 +6,9 @@
 
 inline static void	_echo_status(const char *act, t_thrinfo *inf)
 {
-	long time_offset;
+	long	time_offset;
 
-	time_offset =  get_ms() - inf->ms_start;
+	time_offset = get_ms() - inf->ms_start;
 	pthread_mutex_lock(inf->w_mutex);
 	printf(" [%2.d] %ldms | %s\n", inf->id, time_offset, act);
 	pthread_mutex_unlock(inf->w_mutex);
@@ -16,9 +16,9 @@ inline static void	_echo_status(const char *act, t_thrinfo *inf)
 
 inline static void	*_die(t_thrinfo *inf)
 {
-	long time_offset;
+	long	time_offset;
 
-	time_offset =  get_ms() - inf->ms_start;
+	time_offset = get_ms() - inf->ms_start;
 	inf->xdp->f_death = true;
 	pthread_mutex_unlock(inf->atomic_mutex);
 	pthread_mutex_unlock(inf->unatomic_mutex1);

@@ -5,10 +5,7 @@
 #define DEATH 1 
 #define ALIVE 0 
 
-inline bool	should_die(t_thrinfo *inf)
-{
-	return (get_ms() - inf->ms_last_eat > inf->xdp->tt_die);
-}
+#ifdef _DEBUG
 
 inline static void	
 	_launch_workers(int worker_idx, int max_workers, t_external_data *xdp)
@@ -21,10 +18,8 @@ inline static void
 	{
 		thread_idx = xdp->seq[(worker_idx + idx) % xdp->jobsnum];
 		pthread_mutex_unlock(&xdp->atom_muxs[thread_idx]);
-#ifdef _DEBUG
-		printf("o[%2.d] %ldms | OPEN\n", thread_idx+1, \
-				get_ms() - xdp->tinfos[thread_idx].ms_start);
-#endif
+		printf("o[%2.d] %ldms | OPEN\n", thread_idx + 1,
+			get_ms() - xdp->tinfos[thread_idx].ms_start);
 		idx++;
 	}
 	usleep(xdp->tt_sleep * 500);
@@ -33,12 +28,44 @@ inline static void
 	{
 		thread_idx = xdp->seq[((worker_idx + idx) % xdp->jobsnum)];
 		pthread_mutex_lock(&xdp->atom_muxs[thread_idx]);
-#ifdef _DEBUG
-		printf("x[%2.d] %ldms | LOCK\n", thread_idx+1, \
-	 			get_ms() - xdp->tinfos[thread_idx].ms_start);
-#endif
+		printf("x[%2.d] %ldms | LOCK\n", thread_idx + 1,
+			get_ms() - xdp->tinfos[thread_idx].ms_start);
 		idx++;
 	}
+}
+
+//if not defined _DEBUG
+#else
+
+inline static void	
+	_launch_workers(int worker_idx, int max_workers, t_external_data *xdp)
+{
+	int	idx;
+	int	thread_idx;
+
+	idx = 0;
+	while (idx < max_workers && !xdp->f_death)
+	{
+		thread_idx = xdp->seq[(worker_idx + idx) % xdp->jobsnum];
+		pthread_mutex_unlock(&xdp->atom_muxs[thread_idx]);
+		idx++;
+	}
+	usleep(xdp->tt_sleep * 500);
+	idx = 0;
+	while (idx < max_workers)
+	{
+		thread_idx = xdp->seq[((worker_idx + idx) % xdp->jobsnum)];
+		pthread_mutex_lock(&xdp->atom_muxs[thread_idx]);
+		idx++;
+	}
+}
+
+//_DEBUG
+#endif
+
+inline bool	should_die(t_thrinfo *inf)
+{
+	return (get_ms() - inf->ms_last_eat > inf->xdp->tt_die);
 }
 
 inline static int	_workers_status(t_external_data *xdp)

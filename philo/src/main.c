@@ -1,28 +1,5 @@
 #include "philo.h"
 
-#ifdef _DEBUG
-# include <signal.h>
-# include <stdio.h>
-# include <execinfo.h>
-# include <signal.h>
-# include <stdlib.h>
-# include <unistd.h>
-
-void _segv_handler(int sig)
-{
-  void *array[10];
-  size_t size;
-
-  size = backtrace(array, 10);
-
-  fprintf(stderr, "Error: signal %d:\n", sig);
-  backtrace_symbols_fd(array, size, STDERR_FILENO);
-  exit(1);
-}
-/* _DEBUG */
-#endif 
-
-
 static int	_handle_args(int ac, char **av)
 {
 	size_t		idx;
@@ -64,7 +41,7 @@ static void	_run(t_external_data *xdp)
 {
 	int			idx;
 	int			err;
-	int  		thread_idx;
+	int			thread_idx;
 
 	idx = 0;
 	while (idx < xdp->jobsnum)
@@ -81,36 +58,13 @@ static void	_run(t_external_data *xdp)
 	_xdp_clear(xdp);
 }
 
-void debug_info(t_external_data *xdp)
-{
-	int idx;
-	
-	idx = 0;
-	printf(" Queue: ");
-	while (idx < xdp->jobsnum - 1)
-	{
-		printf("%d, ", xdp->seq[idx++]);
-	}
-	printf("%d\n", xdp->seq[idx]);
-	idx = 0;
-	printf(" Forks: \n");
-	while (idx < xdp->jobsnum - 1)
-	{
-		printf("[%d] %p %p\n", idx + 1, 
-			(void *)xdp->tinfos[idx].unatomic_mutex1,
-			(void *)xdp->tinfos[idx].unatomic_mutex1);
-	}
-}
-
 int	main(int ac, char **av)
 {
 	t_external_data	xd;
+
 	_handle_args(ac, av);
 	init(&xd, av);
-#ifdef _DEBUG
-	signal(SIGSEGV, _segv_handler);
-	debug_info(xd)
-#endif
+	debug_info(&xd);
 	_run(&xd);
 	return (RETURN_SUCCESS);
 }
