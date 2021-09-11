@@ -2,7 +2,7 @@
 NAME := Philosophers
 BIN = philo
 
-MAKEFLAGS = -j5
+MAKEFLAGS = -j1
 VPATH = src/
 
 PHILO_SRC := $(wildcard $(VPATH)*.c) #FIXME  beware wildcards
@@ -12,22 +12,17 @@ DIRS := $(patsubst $(VPATH)%, $(OBJPATH)%, $(shell find $(VPATH) -type d))
 PHILO_OBJ := $(patsubst $(VPATH)%, $(OBJPATH)%, $(PHILO_SRC:.c=.o))
 PHILO_INC := -Iinclude
 
-############################################################################################ 
+############################################################################################# 
 #GCC
 CFLAGS := -Wall -Wextra -Werror -MMD -MP -pthread -pedantic-errors
-ifeq ($(MAKECMDGOALS), debug)
-	CFLAGS += -Og -g3 
-else ifeq ($(MAKECMDGOALS), gdb)
-	CFLAGS += -Og -g3 
-else
-	CFLAGS += -Ofast
+ifeq ( $(MAKECMDGOALS), all)
+	MAKEFLAGS = -j8
 endif
 ############################################################################################
 
 
-all: $(OBJPATH) $(BIN)
-
-$(BIN): $(PHILO_OBJ)
+all: CFLAGS += -Ofast $(BIN)
+$(BIN): $(OBJPATH) $(PHILO_OBJ)
 	$(green)
 	$(CC) $(PHILO_INC) $(PHILO_OBJ) -o $(BIN) $(CFLAGS)
 	$(orange)
@@ -39,7 +34,14 @@ $(OBJPATH)%.o: %.c
 	$(CC) $(PHILO_INC) -c $< -o $@ $(CFLAGS)
 	$(reset)
 
-debug: re 
+debug: CFLAGS += -Og -g3 -D_DEBUG  
+debug: clean $(OBJPATH) $(PHILO_OBJ) 
+	$(green)
+	$(CC) $(PHILO_INC) $(PHILO_OBJ) -o $(BIN) $(CFLAGS)
+	$(cyan)
+	@echo "\t==============> Successfully compiled $(BIN) [+]"
+	$(MAKE) clean # For recompile on all rule
+	$(reset)
 
 $(OBJPATH):
 	$(green)	
@@ -53,22 +55,21 @@ clean:
 
 fclean: clean
 	$(red)
-	rm -rf $(PHILO)
+	rm -rf $(BIN)
 	$(reset)
 
-re: fclean
-	@$(MAKE) all
+re: fclean all
+	#multijobs requests run 'all' like this
+	#because it may not remove binary at moment of all runs
+	#$(MAKE) all
 
-run: 
-	./bin/philo
-
-.PHONY:  all run re fclean clean
+.PHONY: all run re fclean clean
 
 val: $(NAME)
 	valgrind --leak-check=full ./$(NAME)
 
 gdb: debug
-	gdb	./$(PHILO)
+	gdb	./$(BIN)
 ############################################################################################
 #Dependencies
 ifeq ($(MAKECMDGOALS),clean)
