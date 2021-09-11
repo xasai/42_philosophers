@@ -21,7 +21,8 @@ endif
 ############################################################################################
 
 
-all: CFLAGS += -Ofast $(BIN)
+all: CFLAGS += -Ofast
+all: $(BIN)
 $(BIN): $(OBJPATH) $(PHILO_OBJ)
 	$(green)
 	$(CC) $(PHILO_INC) $(PHILO_OBJ) -o $(BIN) $(CFLAGS)
@@ -59,9 +60,6 @@ fclean: clean
 	$(reset)
 
 re: fclean all
-	#multijobs requests run 'all' like this
-	#because it may not remove binary at moment of all runs
-	#$(MAKE) all
 
 .PHONY: all run re fclean clean
 

@@ -1,4 +1,12 @@
 #include "philo.h"
+#include <unistd.h>
+
+int	error(const char *err)
+{
+	write(STDERR_FILENO, err, _strlen(err));
+	write(STDERR_FILENO, "\n", 1);
+	return (FAILURE);
+}
 
 void	*xmalloc(size_t size)
 {
@@ -6,16 +14,11 @@ void	*xmalloc(size_t size)
 
 	p = malloc(size);
 	if (NULL == p)
-		exit_error("Memory allocation failure");
+	{
+		error("Error: Memory allocation failure");
+		return (NULL);
+	}
 	return (memset(p, 0, size));
-}
-
-void	exit_error(const char *message)
-{
-	if (message)
-		write(STDERR_FILENO, message, _strlen(message));
-	write(STDERR_FILENO, "\n", 1);
-	exit (EXIT_FAILURE);
 }
 
 size_t	_strlen(const char *s)

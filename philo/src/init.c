@@ -8,7 +8,7 @@ inline static void	_init_queue(t_external_data *xdp)
 
 	job_idx = 0;
 	seq_idx = 0;
-	seq = xmalloc(sizeof(*seq) * xdp->jobsnum);
+	seq = xdp->seq;
 	while (job_idx < xdp->jobsnum)
 	{
 		seq[seq_idx++] = job_idx;
@@ -20,10 +20,9 @@ inline static void	_init_queue(t_external_data *xdp)
 		seq[seq_idx++] = job_idx;
 		job_idx += 2;
 	}
-	xdp->seq = seq;
 }
 
-inline static void	_init_thread_data(t_external_data *xdp, long idx)
+inline static int	_init_thread_data(t_external_data *xdp, long idx)
 {
 	t_thrinfo	*ti;
 
@@ -39,18 +38,19 @@ inline static void	_init_thread_data(t_external_data *xdp, long idx)
 	if (pthread_mutex_init(ti->atomic_mutex, NULL)
 		|| pthread_mutex_init(ti->unatomic_mutex1, NULL))
 	{
-		exit_error("pthread_mutex_init() failure");
+		return (error("pthread_mutex_init() failure"));
 	}
 	pthread_mutex_lock(ti->atomic_mutex);
 	ti->w_mutex = &xdp->w_mutex;
+	return (SUCCESS);
 }
 
-inline static void	_init_external_data(t_external_data *xdp, char **av)
+inline static int	_init_external_data(t_external_data *xdp, char **av)
 {
 	*xdp = (t_external_data){0};
 	xdp->jobsnum = _atol(av[1]);
 	if (xdp->jobsnum == 0)
-		exit_error("First argument should be positive not zero num.");
+		return (error("First argument should be positive not zero num."));
 	xdp->tt_die = _atol(av[2]);
 	xdp->tt_eat = _atol(av[3]);
 	xdp->tt_sleep = _atol(av[4]);
@@ -58,14 +58,17 @@ inline static void	_init_external_data(t_external_data *xdp, char **av)
 		xdp->max_iter = _atol(av[5]);
 	else
 		xdp->max_iter = -1;
-	xdp->threads = xmalloc(sizeof(*xdp->threads) * xdp->jobsnum);
+	xdp->threads = xmalloc(sizeof(*xdp->threads) * xdp->jobsnum + 1);
 	xdp->tinfos = xmalloc(sizeof(*xdp->tinfos) * xdp->jobsnum);
 	xdp->atom_muxs = xmalloc(sizeof(*xdp->atom_muxs) * xdp->jobsnum);
 	xdp->unatom_muxs = xmalloc(sizeof(*xdp->unatom_muxs) * xdp->jobsnum);
 	pthread_mutex_init(&xdp->w_mutex, NULL);
+	xdp->seq = xmalloc(sizeof(*xdp->seq) * xdp->jobsnum);
+	return (SUCCESS);
 }
 
-void	init(t_external_data *xdp, char **av)
+//TODO failure
+int	init(t_external_data *xdp, char **av)
 {
 	long	idx;
 
@@ -74,4 +77,5 @@ void	init(t_external_data *xdp, char **av)
 	_init_queue(xdp);
 	while (idx < xdp->jobsnum)
 		_init_thread_data(xdp, idx++);
+	return (SUCCESS);
 }

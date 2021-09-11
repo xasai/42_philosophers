@@ -1,29 +1,31 @@
 #include "philo.h"
 
-static int	_handle_args(int ac, char **av)
+static int	_validate_args(int ac, char **av)
 {
 	size_t		idx;
 	const char	*invalid_arg = "Arguments may contain only positive numbers";
-	const char	*usage = "./philo {philo_count} {time_to_die} {time_to_eat}"
-							" {time_to_sleep} [number_of_iterations]";
+	const char	*usage = "USAGE: ./philo  NLWP  TIMEOUT"
+				 		 "WORK_TIME  SLEEP_TIME  [ITERATIONS]";
 
 	if (ac > 6 || ac < 5)
-		exit_error(usage);
+		return (error(usage));
 	while (--ac)
 	{
 		idx = 0;
 		while (av[ac][idx])
 			if (!_isdigit(av[ac][idx++]))
-				exit_error(invalid_arg);
+				return (error(invalid_arg));
 	}
-	return (RETURN_SUCCESS);
+	return (SUCCESS);
 }
 
-static void	_xdp_clear(t_external_data *xdp)
+static void	_clear(t_external_data *xdp)
 {
 	long	idx;
 
 	idx = 0;
+	printf("exiting ...\n");
+	usleep(5000);
 	while (idx < xdp->jobsnum)
 	{
 		pthread_mutex_destroy(&xdp->atom_muxs[idx]);
@@ -37,34 +39,42 @@ static void	_xdp_clear(t_external_data *xdp)
 	free(xdp->unatom_muxs);
 }
 
-static void	_run(t_external_data *xdp)
+static int	_run(t_external_data *xdp)
 {
 	int			idx;
-	int			err;
 	int			thread_idx;
 
 	idx = 0;
 	while (idx < xdp->jobsnum)
 	{
 		thread_idx = xdp->seq[idx];
-		err = pthread_create(&xdp->threads[thread_idx], NULL,
-				thread_entrypoint, &xdp->tinfos[idx]);
-		if (err)
-			exit_error("pthread_create() failure");
-		pthread_detach(xdp->threads[idx]);
+		if (pthread_create(&xdp->threads[thread_idx], NULL,
+				thread_entrypoint, &xdp->tinfos[idx]))
+			return (error("Error: pthread_create failure"));
+		if (pthread_detach(xdp->threads[thread_idx]))
+			return (error("Error: pthread_detach failure"));
 		idx++;
 	}
-	schedule(xdp);
-	_xdp_clear(xdp);
+	if (pthread_create(&xdp->threads[xdp->jobsnum], NULL,
+			schedule, xdp))
+		return (error("pthread_create() failure"));
+	while (xdp->f_death != true)
+		usleep(1000);
+	return (SUCCESS);
 }
 
 int	main(int ac, char **av)
 {
 	t_external_data	xd;
 
-	_handle_args(ac, av);
-	init(&xd, av);
+	if (_validate_args(ac, av))
+		return (EXIT_FAILURE);
+	if (init(&xd, av))
+	{
+		_clear(&xd);
+		return (EXIT_FAILURE);
+	}
 	debug_info(&xd);
 	_run(&xd);
-	return (RETURN_SUCCESS);
+	_clear(&xd);
 }

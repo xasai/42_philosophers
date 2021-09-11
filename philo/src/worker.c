@@ -30,6 +30,8 @@ inline static void	*_die(t_thrinfo *inf)
 
 inline static bool	_eat(t_thrinfo *inf)
 {
+	if (inf->xdp->f_death)
+		return (DEATH);
 	pthread_mutex_lock(inf->atomic_mutex);
 	if (should_die(inf))
 		return (DEATH);
@@ -37,7 +39,7 @@ inline static bool	_eat(t_thrinfo *inf)
 	_echo_status("has taken a fork", inf);
 	pthread_mutex_lock(inf->unatomic_mutex2);
 	_echo_status("has taken a fork", inf);
-	if (should_die(inf))
+	if (inf->xdp->f_death || should_die(inf))
 		return (DEATH);
 	_echo_status("is eating", inf);
 	inf->ms_last_eat = get_ms();

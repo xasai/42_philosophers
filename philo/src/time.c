@@ -19,8 +19,8 @@ inline bool	msleep(long ms_duration, t_thrinfo *ti)
 	{
 		start = get_ms();
 		if (should_die(ti))
-			return (RETURN_FAILURE);
+			return (FAILURE);
 		usleep(100);
 	}
-	return (RETURN_SUCCESS);
+	return (SUCCESS);
 }

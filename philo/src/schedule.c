@@ -83,17 +83,20 @@ inline static int	_workers_status(t_external_data *xdp)
 	return (ALIVE);
 }
 
-void	schedule(t_external_data *xdp)
+void	*schedule(void *arg)
 {
 	int				worker_idx;
 	int				max_workers;
+	t_external_data	*xdp;
 
+	xdp = arg;
 	worker_idx = 0;
 	max_workers = xdp->jobsnum / 2;
-	usleep(100);
+	usleep(500);
 	while (_workers_status(xdp) == ALIVE)
 	{
 		_launch_workers(worker_idx, max_workers, xdp);
 		worker_idx = (worker_idx + max_workers) % xdp->jobsnum;
 	}
+	return (NULL);
 }
