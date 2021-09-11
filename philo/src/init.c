@@ -42,6 +42,7 @@ inline static void	_init_thread_data(t_external_data *xdp, long idx)
 		exit_error("pthread_mutex_init() failure");
 	}
 	pthread_mutex_lock(ti->atomic_mutex);
+	ti->w_mutex = &xdp->w_mutex;
 }
 
 inline static void	_init_external_data(t_external_data *xdp, char **av)
@@ -61,6 +62,7 @@ inline static void	_init_external_data(t_external_data *xdp, char **av)
 	xdp->tinfos = xmalloc(sizeof(*xdp->tinfos) * xdp->jobsnum);
 	xdp->atom_muxs = xmalloc(sizeof(*xdp->atom_muxs) * xdp->jobsnum);
 	xdp->unatom_muxs = xmalloc(sizeof(*xdp->unatom_muxs) * xdp->jobsnum);
+	pthread_mutex_init(&xdp->w_mutex, NULL);
 }
 
 void	init(t_external_data *xdp, char **av)

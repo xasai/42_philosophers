@@ -8,7 +8,7 @@ inline long	get_ms(void)
 	return ((now.tv_sec) * (long int)1000 + (now.tv_usec) / 1000);
 }
 
-bool	msleep(long ms_duration, t_thrinfo *ti)
+inline bool	msleep(long ms_duration, t_thrinfo *ti)
 {
 	long	start;
 	long	end;
@@ -20,7 +20,7 @@ bool	msleep(long ms_duration, t_thrinfo *ti)
 		start = get_ms();
 		if (should_die(ti))
 			return (RETURN_FAILURE);
-		usleep(200);
+		usleep(100);
 	}
 	return (RETURN_SUCCESS);
 }
