@@ -14,10 +14,15 @@ PHILO_INC := -Iinclude
 
 ############################################################################################# 
 #GCC
-CFLAGS := -Wall -Wextra -Werror -MMD -MP -pthread -pedantic-errors
+CFLAGS := -Wall -Wextra -Werror -MMD -MP  -pedantic-errors
 ifeq ( $(MAKECMDGOALS), all)
 	MAKEFLAGS = -j8
 endif
+ifeq ($(UNAME), darwin)
+	CFLAGS += -lpthread
+else
+	CFLAGS += -pthread
+endif 
 ############################################################################################
 
 
