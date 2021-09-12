@@ -47,9 +47,9 @@ long		get_ms(void);
 bool		msleep(long ms_duration, t_thrinfo *ti);
 
 //aux.c
-//xmalloc doesnt exits but printing corresponding
+//_xmalloc doesnt exits but printing corresponding
 //message if malloc inside it failed
-void		*xmalloc(size_t size);
+void		*_xmalloc(size_t size);
 
 //aux.c
 //error prints error to STERR_FILENO and returns FAILURE status

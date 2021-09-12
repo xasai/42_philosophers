@@ -78,6 +78,7 @@ inline static int	_workers_status(t_external_data *xdp)
 	{
 		printf(" [%2.d] %5.ldms | died (sched)\n", 1, \
 				get_ms() - xdp->tinfos->ms_start);
+		xdp->f_death = true;
 		return (DEATH);
 	}
 	return (ALIVE);

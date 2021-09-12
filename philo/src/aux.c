@@ -8,7 +8,7 @@ int	error(const char *err)
 	return (FAILURE);
 }
 
-void	*xmalloc(size_t size)
+void	*_xmalloc(size_t size)
 {
 	void	*p;
 

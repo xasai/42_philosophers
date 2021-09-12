@@ -32,6 +32,7 @@ static void	_clear(t_external_data *xdp)
 		pthread_mutex_destroy(&xdp->unatom_muxs[idx]);
 		idx++;
 	}
+	pthread_mutex_destroy(&xdp->w_mutex);
 	free(xdp->seq);
 	free(xdp->tinfos);
 	free(xdp->threads);
@@ -55,17 +56,23 @@ static int	_run(t_external_data *xdp)
 			return (error("Error: pthread_detach failure"));
 		idx++;
 	}
-	if (pthread_create(&xdp->threads[xdp->jobsnum], NULL,
-			schedule, xdp))
+	if (pthread_create(&xdp->threads[xdp->jobsnum], NULL, schedule, xdp))
 		return (error("pthread_create() failure"));
-	while (xdp->f_death != true)
-		usleep(1000);
+	if (pthread_detach(xdp->threads[xdp->jobsnum]))
+		return (error("Error: pthread_detach failure"));
+	while (true)
+	{
+		if (xdp->f_death == true || xdp->threads_done == xdp->jobsnum)
+			break ;
+		usleep(5000);
+	}
 	return (SUCCESS);
 }
 
 int	main(int ac, char **av)
 {
 	t_external_data	xd;
+	int				status_code;
 
 	if (_validate_args(ac, av))
 		return (EXIT_FAILURE);
@@ -75,6 +82,7 @@ int	main(int ac, char **av)
 		return (EXIT_FAILURE);
 	}
 	debug_info(&xd);
-	_run(&xd);
+	status_code = _run(&xd);
 	_clear(&xd);
+	return (status_code);
 }

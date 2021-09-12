@@ -58,12 +58,12 @@ inline static int	_init_external_data(t_external_data *xdp, char **av)
 		xdp->max_iter = _atol(av[5]);
 	else
 		xdp->max_iter = -1;
-	xdp->threads = xmalloc(sizeof(*xdp->threads) * xdp->jobsnum + 1);
-	xdp->tinfos = xmalloc(sizeof(*xdp->tinfos) * xdp->jobsnum);
-	xdp->atom_muxs = xmalloc(sizeof(*xdp->atom_muxs) * xdp->jobsnum);
-	xdp->unatom_muxs = xmalloc(sizeof(*xdp->unatom_muxs) * xdp->jobsnum);
+	xdp->threads = _xmalloc(sizeof(*xdp->threads) * (xdp->jobsnum + 1));
+	xdp->tinfos = _xmalloc(sizeof(*xdp->tinfos) * xdp->jobsnum);
+	xdp->atom_muxs = _xmalloc(sizeof(*xdp->atom_muxs) * xdp->jobsnum);
+	xdp->unatom_muxs = _xmalloc(sizeof(*xdp->unatom_muxs) * xdp->jobsnum);
 	pthread_mutex_init(&xdp->w_mutex, NULL);
-	xdp->seq = xmalloc(sizeof(*xdp->seq) * xdp->jobsnum);
+	xdp->seq = _xmalloc(sizeof(*xdp->seq) * xdp->jobsnum);
 	return (SUCCESS);
 }
 
@@ -74,6 +74,10 @@ int	init(t_external_data *xdp, char **av)
 
 	idx = 0;
 	_init_external_data(xdp, av);
+	if (xdp->atom_muxs == NULL || xdp->unatom_muxs == NULL
+		|| xdp->threads == NULL || xdp->tinfos == NULL
+		|| xdp->seq == NULL)
+		return (error("Error: Memory allocation failure"));
 	_init_queue(xdp);
 	while (idx < xdp->jobsnum)
 		_init_thread_data(xdp, idx++);
