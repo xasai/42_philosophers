@@ -1,5 +1,6 @@
 #include "philo.h" 
 #include "t_external_data.h"
+
 #ifdef _DEBUG
 # include <signal.h>
 # include <stdio.h>
@@ -26,12 +27,12 @@ void	debug_info(t_external_data *xdp)
 	idx = 0;
 	signal(SIGSEGV, _segv_handler);
 	printf(" Queue: ");
-	while (idx < xdp->jobsnum - 1)
+	while (idx < xdp->threads_num - 1)
 		printf("%d, ", xdp->seq[idx++] + 1);
-	printf("%d\n", xdp->seq[idx]);
+	printf("%d\n", xdp->seq[idx] + 1);
 	idx = 0;
 	printf(" Forks: \n");
-	while (idx < xdp->jobsnum)
+	while (idx < xdp->threads_num)
 	{
 		printf(" [%d] %p %p\n", idx + 1,
 			(void *)xdp->tinfos[idx].unatomic_mutex1,
@@ -41,10 +42,9 @@ void	debug_info(t_external_data *xdp)
 	printf("----------------------------------\n\n");
 }
 
-/* _DEBUG */
-#else
+#elif !defined(_DEBUG)
 
-void	debug_info(t_external_data *x)
+inline void	debug_info(t_external_data *x)
 {
 	(void)x;
 }

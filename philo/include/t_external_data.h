@@ -6,7 +6,7 @@
 
 typedef struct s_external_data
 {
-	int					jobsnum;
+	int					threads_num;
 	int					tt_die;
 	int					tt_eat;
 	int					tt_sleep;

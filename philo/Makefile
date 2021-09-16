@@ -2,10 +2,14 @@
 NAME := Philosophers
 BIN = philo
 
-MAKEFLAGS = -j1
+ifeq ($(MAKECMDGOALS), all)
+	MAKEFLAGS = -j8
+else ifeq ($(MAKECMDGOALS), )
+	MAKEFLAGS = -j8
+endif
 VPATH = src/
 
-PHILO_SRC := $(wildcard $(VPATH)*.c) #FIXME  beware wildcards
+PHILO_SRC := src/aux.c src/debug.c src/init.c src/main.c src/schedule.c src/time.c src/worker.c
 
 OBJPATH := .obj/
 DIRS := $(patsubst $(VPATH)%, $(OBJPATH)%, $(shell find $(VPATH) -type d))
@@ -15,9 +19,6 @@ PHILO_INC := -Iinclude
 ############################################################################################# 
 #GCC
 CFLAGS := -Wall -Wextra -Werror -MMD -MP  -pedantic-errors
-ifeq ( $(MAKECMDGOALS), all)
-	MAKEFLAGS = -j8
-endif
 ifeq ($(UNAME), darwin)
 	CFLAGS += -lpthread
 else
@@ -28,6 +29,7 @@ endif
 
 all: CFLAGS += -Ofast
 all: $(BIN)
+
 $(BIN): $(OBJPATH) $(PHILO_OBJ)
 	$(green)
 	$(CC) $(PHILO_INC) $(PHILO_OBJ) -o $(BIN) $(CFLAGS)
@@ -46,7 +48,7 @@ debug: clean $(OBJPATH) $(PHILO_OBJ)
 	$(CC) $(PHILO_INC) $(PHILO_OBJ) -o $(BIN) $(CFLAGS)
 	$(cyan)
 	@echo "\t==============> Successfully compiled $(BIN) [+]"
-	$(MAKE) clean # For recompile on all rule
+	$(MAKE) clean 
 	$(reset)
 
 $(OBJPATH):
@@ -64,7 +66,8 @@ fclean: clean
 	rm -rf $(BIN)
 	$(reset)
 
-re: fclean all
+re: fclean
+	$(MAKE) all
 
 .PHONY: all run re fclean clean
 
@@ -84,6 +87,7 @@ else
 DEPFILES := $(PHILO_OBJ:.o=.d)
 -include $(DEPFILES)
 endif
+	
 ############################################################################################
 reset			 := @echo -n "\033[0;m"
 black            := @echo -n "\033[0;30m"

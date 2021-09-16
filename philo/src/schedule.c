@@ -16,20 +16,20 @@ inline static void
 	idx = 0;
 	while (idx < max_workers && !xdp->f_death)
 	{
-		thread_idx = xdp->seq[(worker_idx + idx) % xdp->jobsnum];
+		thread_idx = xdp->seq[(worker_idx + idx) % xdp->threads_num];
 		pthread_mutex_unlock(&xdp->atom_muxs[thread_idx]);
-		printf("o[%2.d] %ldms | OPEN\n", thread_idx + 1,
-			get_ms() - xdp->tinfos[thread_idx].ms_start);
+		printf(" %ldms | %d | oooooo OPEN oooooo\n",
+			get_ms() - xdp->tinfos[thread_idx].ms_start, thread_idx + 1);
 		idx++;
 	}
 	usleep(xdp->tt_sleep * 500);
 	idx = 0;
 	while (idx < max_workers)
 	{
-		thread_idx = xdp->seq[((worker_idx + idx) % xdp->jobsnum)];
+		thread_idx = xdp->seq[((worker_idx + idx) % xdp->threads_num)];
 		pthread_mutex_lock(&xdp->atom_muxs[thread_idx]);
-		printf("x[%2.d] %ldms | LOCK\n", thread_idx + 1,
-			get_ms() - xdp->tinfos[thread_idx].ms_start);
+		printf(" %ldms | %d | xxxxxx CLOSE xxxxxx\n",
+			get_ms() - xdp->tinfos[thread_idx].ms_start, thread_idx + 1);
 		idx++;
 	}
 }
@@ -46,7 +46,7 @@ inline static void
 	idx = 0;
 	while (idx < max_workers && !xdp->f_death)
 	{
-		thread_idx = xdp->seq[(worker_idx + idx) % xdp->jobsnum];
+		thread_idx = xdp->seq[(worker_idx + idx) % xdp->threads_num];
 		pthread_mutex_unlock(&xdp->atom_muxs[thread_idx]);
 		idx++;
 	}
@@ -54,7 +54,7 @@ inline static void
 	idx = 0;
 	while (idx < max_workers)
 	{
-		thread_idx = xdp->seq[((worker_idx + idx) % xdp->jobsnum)];
+		thread_idx = xdp->seq[((worker_idx + idx) % xdp->threads_num)];
 		pthread_mutex_lock(&xdp->atom_muxs[thread_idx]);
 		idx++;
 	}
@@ -63,25 +63,17 @@ inline static void
 //_DEBUG
 #endif
 
-inline bool	should_die(t_thrinfo *inf)
-{
-	return (get_ms() - inf->ms_last_eat > inf->xdp->tt_die);
-}
-
 inline static int	_workers_status(t_external_data *xdp)
 {
-	if (xdp->threads_done == xdp->jobsnum || xdp->f_death)
+	if (xdp->threads_done == xdp->threads_num || xdp->f_death)
 		return (DEATH);
-	if (xdp->jobsnum != 1)
+	if (xdp->threads_num != 1)
 		return (ALIVE);
-	if (should_die(xdp->tinfos))
-	{
-		printf(" [%2.d] %5.ldms | died (sched)\n", 1, \
-				get_ms() - xdp->tinfos->ms_start);
-		xdp->f_death = true;
-		return (DEATH);
-	}
-	return (ALIVE);
+	while (!should_die(xdp->tinfos))
+		usleep(100);
+	printf(" %ldms | %2d| died\n", get_ms() - xdp->tinfos->ms_start, 1);
+	xdp->f_death = true;
+	return (DEATH);
 }
 
 void	*schedule(void *arg)
@@ -92,12 +84,12 @@ void	*schedule(void *arg)
 
 	xdp = arg;
 	worker_idx = 0;
-	max_workers = xdp->jobsnum / 2;
-	usleep(500);
+	max_workers = xdp->threads_num / 2;
+	usleep(100);
 	while (_workers_status(xdp) == ALIVE)
 	{
 		_launch_workers(worker_idx, max_workers, xdp);
-		worker_idx = (worker_idx + max_workers) % xdp->jobsnum;
+		worker_idx = (worker_idx + max_workers) % xdp->threads_num;
 	}
 	return (NULL);
 }

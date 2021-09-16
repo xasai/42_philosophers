@@ -26,7 +26,7 @@ static void	_clear(t_external_data *xdp)
 	idx = 0;
 	printf("exiting ...\n");
 	usleep(5000);
-	while (idx < xdp->jobsnum)
+	while (idx < xdp->threads_num)
 	{
 		pthread_mutex_destroy(&xdp->atom_muxs[idx]);
 		pthread_mutex_destroy(&xdp->unatom_muxs[idx]);
@@ -46,7 +46,7 @@ static int	_run(t_external_data *xdp)
 	int			thread_idx;
 
 	idx = 0;
-	while (idx < xdp->jobsnum)
+	while (idx < xdp->threads_num)
 	{
 		thread_idx = xdp->seq[idx];
 		if (pthread_create(&xdp->threads[thread_idx], NULL,
@@ -56,13 +56,13 @@ static int	_run(t_external_data *xdp)
 			return (error("Error: pthread_detach failure"));
 		idx++;
 	}
-	if (pthread_create(&xdp->threads[xdp->jobsnum], NULL, schedule, xdp))
+	if (pthread_create(&xdp->threads[xdp->threads_num], NULL, schedule, xdp))
 		return (error("pthread_create() failure"));
-	if (pthread_detach(xdp->threads[xdp->jobsnum]))
+	if (pthread_detach(xdp->threads[xdp->threads_num]))
 		return (error("Error: pthread_detach failure"));
 	while (true)
 	{
-		if (xdp->f_death == true || xdp->threads_done == xdp->jobsnum)
+		if (xdp->f_death == true || xdp->threads_done == xdp->threads_num)
 			break ;
 		usleep(5000);
 	}
